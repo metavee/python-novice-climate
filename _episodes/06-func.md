@@ -27,7 +27,7 @@ keypoints:
 ---
 
 At this point,
-we've written code to draw some interesting features in our inflammation data,
+we've written code to draw some interesting features in our data,
 loop over all our data files to quickly draw these plots for each of them,
 and have Python make decisions based on what it sees in our data.
 But, our code is getting pretty long and complicated;
@@ -226,31 +226,27 @@ or the next person who reads it won't be able to understand what's going on.
 ## Tidying up
 
 Now that we know how to wrap bits of code up in functions,
-we can make our inflammation analysis easier to read and easier to reuse.
+we can make our data analysis easier to read and easier to reuse.
 First, let's make an `analyze` function that generates our plots:
 
 ~~~
 def analyze(filename):
 
-    data = numpy.loadtxt(fname=filename, delimiter=',')
+    data = numpy.loadtxt(filename, delimiter=',', skiprows=1)
 
-    fig = matplotlib.pyplot.figure(figsize=(10.0, 3.0))
+    fig = plt.figure(figsize=(10.0, 4.0))
 
-    axes1 = fig.add_subplot(1, 3, 1)
-    axes2 = fig.add_subplot(1, 3, 2)
-    axes3 = fig.add_subplot(1, 3, 3)
+    axes1 = fig.add_subplot(1, 2, 1)
+    axes2 = fig.add_subplot(1, 2, 2)
 
-    axes1.set_ylabel('average')
-    axes1.plot(numpy.mean(data, axis=0))
+    axes1.set_ylabel('Temperature (C)')
+    axes1.plot(data[:,0], data[:,1])
 
-    axes2.set_ylabel('max')
-    axes2.plot(numpy.max(data, axis=0))
-
-    axes3.set_ylabel('min')
-    axes3.plot(numpy.min(data, axis=0))
+    axes2.set_ylabel('Precipitation (mm)')
+    axes2.plot(data[:,0], data[:,2])
 
     fig.tight_layout()
-    matplotlib.pyplot.show()
+    plt.show()
 ~~~
 {: .python}
 
@@ -260,7 +256,7 @@ we noticed:
 ~~~
 def detect_problems(filename):
 
-    data = numpy.loadtxt(fname=filename, delimiter=',')
+    data = numpy.loadtxt(filename, delimiter=',')
 
     if numpy.max(data, axis=0)[0] == 0 and numpy.max(data, axis=0)[20] == 20:
         print('Suspicious looking maxima!')
@@ -324,19 +320,32 @@ That looks right,
 so let's try `center` on our real data:
 
 ~~~
-data = numpy.loadtxt(fname='inflammation-01.csv', delimiter=',')
-print(center(data, 0))
+data = numpy.loadtxt('CAN.csv', delimiter=',', skiprows=1)
+temp = data[:,1]
+print(center(temp, 0))
 ~~~
 {: .python}
 
 ~~~
-[[-6.14875 -6.14875 -5.14875 ..., -3.14875 -6.14875 -6.14875]
- [-6.14875 -5.14875 -4.14875 ..., -5.14875 -6.14875 -5.14875]
- [-6.14875 -5.14875 -5.14875 ..., -4.14875 -5.14875 -5.14875]
- ...,
- [-6.14875 -5.14875 -5.14875 ..., -5.14875 -5.14875 -5.14875]
- [-6.14875 -6.14875 -6.14875 ..., -6.14875 -4.14875 -6.14875]
- [-6.14875 -6.14875 -5.14875 ..., -5.14875 -5.14875 -6.14875]]
+[-0.2477398  -0.43803216 -0.48610355 -0.73105003 -0.12263204 -0.25942422
+ -0.98887397 -0.36625005 -0.81462623 -0.34993221 -0.68976737 -0.46072341
+ -0.56326104 -0.54125835  0.28064011 -0.70829917 -1.0752349  -0.77998306
+ -0.61130668 -0.40600063 -0.26109792 -0.91031028 -0.59744598 -0.14988901
+ -0.52694656 -0.36811019 -0.53704788  0.18670415 -0.69897224  0.12237357
+  0.77833985 -0.39700939 -1.26845504 -0.53964807 -0.74228813 -1.16954566
+  0.08542584  0.56833028 -0.24442865  0.62529801  0.19157456  0.32686661
+  0.20149134  0.82073258 -0.22166635 -0.31483032  0.26315497 -0.23529006
+ -0.27167369 -1.09315063 -0.47925044  0.74390935  0.67072724  0.09061478
+ -0.16132165 -0.84962608 -0.33862163  0.52142142 -0.4467044   0.47364615
+ -0.52173282 -0.0406809   0.06135081 -0.81645156 -0.65359069 -0.40799953
+ -0.54891301  0.0565586   0.38538788 -0.29589416 -0.04510166 -2.10050823
+  0.57133769 -1.00410796 -0.19717742 -0.16421605  0.86742161 -0.56865646
+ -0.42103816  0.37550782  1.91801404 -1.08911468 -0.038857    0.01048087
+ -0.0082369  -0.28567172  0.97089575  0.81464909 -0.28180648 -0.25331928
+  0.32953213 -0.27320815  0.43825959  0.53589915  0.57435654  0.08722209
+  0.54125117  2.23848628  1.44916009  0.69813441  1.49395131  0.572515
+  1.02208661 -0.10503818  1.5609207   1.88146971  0.60538529  0.22378348
+  0.4276676   2.72102975  1.49110554  1.7100787 ]
 ~~~
 {: .output}
 
@@ -344,31 +353,32 @@ It's hard to tell from the default output whether the result is correct,
 but there are a few simple tests that will reassure us:
 
 ~~~
-print('original min, mean, and max are:', numpy.min(data), numpy.mean(data), numpy.max(data))
-centered = center(data, 0)
-print('min, mean, and max of centered data are:', numpy.min(centered), numpy.mean(centered), numpy.max(centered))
+print('original min, mean, and max are:', numpy.min(temp), numpy.mean(temp), numpy.max(temp))
+centered = center(temp, 0)
+print('min, mean, and max of centered temperature are:', numpy.min(centered), numpy.mean(centered), numpy.max(centered))
 ~~~
 {: .python}
 
 ~~~
-original min, mean, and max are: 0.0 6.14875 20.0
-min, mean, and and max of centered data are: -6.14875 2.84217094304e-16 13.85125
+original min, mean, and max are: -9.525187492 -7.42467926652 -4.703649521
+min, mean, and max of centered temperature are: -2.10050822548 6.50273485852e-16 2.72102974552
+
 ~~~
 {: .output}
 
 That seems almost right:
-the original mean was about 6.1,
-so the lower bound from zero is now about -6.1.
+the original mean was about -9.5,
+so the lower bound from zero is now about -2.1.
 The mean of the centered data isn't quite zero --- we'll explore why not in the challenges --- but it's pretty close.
 We can even go further and check that the standard deviation hasn't changed:
 
 ~~~
-print('std dev before and after:', numpy.std(data), numpy.std(centered))
+print('std dev before and after:', numpy.std(temp), numpy.std(centered))
 ~~~
 {: .python}
 
 ~~~
-std dev before and after: 4.61383319712 4.61383319712
+std dev before and after: 0.77853048975 0.77853048975
 ~~~
 {: .output}
 
@@ -377,12 +387,12 @@ but we probably wouldn't notice if they were different in the sixth decimal plac
 Let's do this instead:
 
 ~~~
-print('difference in standard deviations before and after:', numpy.std(data) - numpy.std(centered))
+print('difference in standard deviations before and after:', numpy.std(temp) - numpy.std(centered))
 ~~~
 {: .python}
 
 ~~~
-difference in standard deviations before and after: -3.5527136788e-15
+difference in standard deviations before and after: -1.11022302463e-16
 ~~~
 {: .output}
 
@@ -462,40 +472,46 @@ In fact,
 we can pass the filename to `loadtxt` without the `fname=`:
 
 ~~~
-numpy.loadtxt('inflammation-01.csv', delimiter=',')
+numpy.loadtxt('CAN.csv', delimiter=',', skiprows=1)
 ~~~
 {: .python}
 
 ~~~
-array([[ 0.,  0.,  1., ...,  3.,  0.,  0.],
-       [ 0.,  1.,  2., ...,  1.,  0.,  1.],
-       [ 0.,  1.,  1., ...,  2.,  1.,  1.],
-       ...,
-       [ 0.,  1.,  1., ...,  1.,  1.,  1.],
-       [ 0.,  0.,  0., ...,  0.,  2.,  0.],
-       [ 0.,  0.,  1., ...,  1.,  1.,  0.]])
+array([[ 1901.        ,    -7.67241907,    37.44835281],
+       [ 1902.        ,    -7.86271143,    38.25142288],
+       [ 1903.        ,    -7.91078281,    37.5530014 ],
+       [ 1904.        ,    -8.15572929,    37.35193253],
+       [ 1905.        ,    -7.54731131,    37.51586914],
+       [ 1906.        ,    -7.68410349,    37.51700592],
+       [ 1907.        ,    -8.41355324,    36.76292038],
+       [ 1908.        ,    -7.79092932,    36.40164948],
+       [ 1909.        ,    -8.2393055 ,    36.98836136],
+       [ 1910.        ,    -7.77461147,    36.27269745],
+       [ 1911.        ,    -8.11444664,    35.95967865],
+       [ 1912.        ,    -7.88540268,    36.27689362],
+       [ 1913.        ,    -7.98794031,    36.81501007],
 ~~~
 {: .output}
 
 but we still need to say `delimiter=`:
 
 ~~~
-numpy.loadtxt('inflammation-01.csv', ',')
+numpy.loadtxt('CAN.csv', ',', skiprows=1)
 ~~~
 {: .python}
 
 ~~~
 ---------------------------------------------------------------------------
 TypeError                                 Traceback (most recent call last)
-<ipython-input-26-e3bc6cf4fd6a> in <module>()
-----> 1 numpy.loadtxt('inflammation-01.csv', ',')
+<ipython-input-21-c5727a7abcab> in <module>()
+----> 1 numpy.loadtxt('CAN.csv', ',', skiprows=1)
 
-/Users/gwilson/anaconda/lib/python2.7/site-packages/numpy/lib/npyio.pyc in loadtxt(fname, dtype, comments, delimiter, converters, skiprows, usecols, unpack, ndmin)
-    775     try:
-    776         # Make sure we're dealing with a proper dtype
---> 777         dtype = np.dtype(dtype)
-    778         defconv = _getconv(dtype)
-    779
+C:\Anaconda3\lib\site-packages\numpy\lib\npyio.py in loadtxt(fname, dtype, comments, delimiter, converters, skiprows, usecols, unpack, ndmin)
+    803     try:
+    804         # Make sure we're dealing with a proper dtype
+--> 805         dtype = np.dtype(dtype)
+    806         defconv = _getconv(dtype)
+    807 
 
 TypeError: data type "," not understood
 ~~~
@@ -708,7 +724,7 @@ and eight others that do.
 If we call the function like this:
 
 ~~~
-numpy.loadtxt('inflammation-01.csv', ',')
+numpy.loadtxt('CAN.csv', ',')
 ~~~
 {: .python}
 
@@ -994,4 +1010,39 @@ readable code!
 > the code more readable. Then, collaborate with one of your neighbors
 > to critique each other's functions and discuss how your function implementations
 > could be further improved to make them more readable.
+{: .challenge}
+
+> ## Functionalize the warmer country code
+>
+> Rewrite the code which determines which country is warmer as a function.
+> You could accept two filenames for different countries as entrance parameters.
+> > ## Solution
+> > def warmer(file1, file2):
+> >     temp1 = numpy.loadtxt(file1, delimiter=',', skiprows=1)[:,1]
+> >     temp2 = numpy.loadtxt(file2, delimiter=',', skiprows=1)[:,1]
+> >     
+> >     # tally of which country is warmer on a given year
+> >     count1 = 0
+> >     count2 = 0
+> >     
+> >     for t1, t2 in zip(temp1, temp2):
+> >         if t1 > t2:
+> >             count1 = count1 + 1
+> >         elif t2 > t1:
+> >             count2 = count2 + 1
+> >     
+> >     print(count1)
+> >     print(count2)
+> >     
+> >     print(numpy.mean(temp1))
+> >     print(numpy.mean(temp2))
+> >     
+> >     
+> >     if t1 > t2:
+> >         print(file1[:3], 'is typically warmer than', file2[:3])
+> >     elif t2 > t1:
+> >         print(file2[:3], 'is typically warmer than', file1[:3])
+> >     else:
+> >         print('Neither', file1[:3], 'nor', file2[:3], 'are clearly warmer than the other.')
+> {: .solution}
 {: .challenge}

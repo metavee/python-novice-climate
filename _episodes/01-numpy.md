@@ -1,5 +1,5 @@
 ---
-title: Analyzing Patient Data
+title: Analyzing Climate Data
 teaching: 30
 exercises: 0
 questions:
@@ -36,7 +36,7 @@ while a lot of powerful, general tools are built into languages like Python,
 specialized tools built up from these basic units live in [libraries]({{ site.github.url }}/reference/#library)
 that can be called upon when needed.
 
-In order to load our inflammation data,
+In order to load our data,
 we need to access ([import]({{ site.github.url }}/reference/#import) in Python terminology)
 a library called [NumPy](http://docs.scipy.org/doc/numpy/ "NumPy Documentation").
 In general you should use this library if you want to do fancy things with numbers,
@@ -55,18 +55,22 @@ Once you've imported the library,
 we can ask the library to read our data file for us:
 
 ~~~
-numpy.loadtxt(fname='inflammation-01.csv', delimiter=',')
+numpy.loadtxt(fname='CAN.csv', delimiter=',', skiprows=1)
 ~~~
 {: .python}
 
 ~~~
-array([[ 0.,  0.,  1., ...,  3.,  0.,  0.],
-       [ 0.,  1.,  2., ...,  1.,  0.,  1.],
-       [ 0.,  1.,  1., ...,  2.,  1.,  1.],
-       ...,
-       [ 0.,  1.,  1., ...,  1.,  1.,  1.],
-       [ 0.,  0.,  0., ...,  0.,  2.,  0.],
-       [ 0.,  0.,  1., ...,  1.,  1.,  0.]])
+array([[ 1901.        ,    -7.67241907,    37.44835281],
+       [ 1902.        ,    -7.86271143,    38.25142288],
+       [ 1903.        ,    -7.91078281,    37.5530014 ],
+       [ 1904.        ,    -8.15572929,    37.35193253],
+       [ 1905.        ,    -7.54731131,    37.51586914],
+       [ 1906.        ,    -7.68410349,    37.51700592],
+       [ 1907.        ,    -8.41355324,    36.76292038],
+       [ 1908.        ,    -7.79092932,    36.40164948],
+       [ 1909.        ,    -8.2393055 ,    36.98836136],
+       [ 1910.        ,    -7.77461147,    36.27269745],
+       [ 1911.        ,    -8.11444664,    35.95967865],
 ~~~
 {: .output}
 
@@ -219,7 +223,7 @@ Just as we can assign a single value to a variable, we can also assign an array 
 to a variable using the same syntax.  Let's re-run `numpy.loadtxt` and save its result:
 
 ~~~
-data = numpy.loadtxt(fname='inflammation-01.csv', delimiter=',')
+numpy.loadtxt(fname='CAN.csv', delimiter=',', skiprows=1)
 ~~~
 {: .python}
 
@@ -233,13 +237,17 @@ print(data)
 {: .python}
 
 ~~~
-[[ 0.  0.  1. ...,  3.  0.  0.]
- [ 0.  1.  2. ...,  1.  0.  1.]
- [ 0.  1.  1. ...,  2.  1.  1.]
- ...,
- [ 0.  1.  1. ...,  1.  1.  1.]
- [ 0.  0.  0. ...,  0.  2.  0.]
- [ 0.  0.  1. ...,  1.  1.  0.]]
+	  [[ 1901.        ,    -7.67241907,    37.44835281],
+       [ 1902.        ,    -7.86271143,    38.25142288],
+       [ 1903.        ,    -7.91078281,    37.5530014 ],
+       [ 1904.        ,    -8.15572929,    37.35193253],
+       [ 1905.        ,    -7.54731131,    37.51586914],
+       [ 1906.        ,    -7.68410349,    37.51700592],
+       [ 1907.        ,    -8.41355324,    36.76292038],
+       [ 1908.        ,    -7.79092932,    36.40164948],
+       [ 1909.        ,    -8.2393055 ,    36.98836136],
+       [ 1910.        ,    -7.77461147,    36.27269745],
+       [ 1911.        ,    -8.11444664,    35.95967865],
 ~~~
 {: .output}
 
@@ -260,9 +268,10 @@ print(type(data))
 
 The output tells us that `data` currently refers to
 an N-dimensional array created by the NumPy library.
-These data correspond to arthritis patients' inflammation.
-The rows are the individual patients and the columns
-are their daily inflammation measurements.
+These data correspond to annual measurements of
+average temperature (in Celsius) and precipitation
+(in millimetres) by country. We are currently looking
+at the data for Canada.
 
 > ## Data Type
 >
@@ -294,12 +303,12 @@ print(data.shape)
 {: .python}
 
 ~~~
-(60, 40)
+(112, 3)
 ~~~
 {: .output}
 
-This tells us that `data` has 60 rows and 40 columns. When we created the
-variable `data` to store our arthritis data, we didn't just create the array, we also
+This tells us that `data` has 112 rows and 3 columns. When we created the
+variable `data` to store our climate data, we didn't just create the array, we also
 created information about the array, called [members]({{ site.github.url }}/reference/#member) or
 attributes. This extra information describes `data` in
 the same way an adjective describes a noun.
@@ -318,21 +327,21 @@ print('first value in data:', data[0, 0])
 {: .python}
 
 ~~~
-first value in data: 0.0
+first value in data: 1901.0
 ~~~
 {: .output}
 
 ~~~
-print('middle value in data:', data[30, 20])
+print('middle value in data:', data[56, 1])
 ~~~
 {: .python}
 
 ~~~
-middle value in data: 13.0
+middle value in data: -7.763300896
 ~~~
 {: .output}
 
-The expression `data[30, 20]` may not surprise you,
+The expression `data[56, 1]` may not surprise you,
 but `data[0, 0]` might.
 Programming languages like Fortran and MATLAB start counting at 1,
 because that's what human beings have done for thousands of years.
@@ -359,27 +368,25 @@ the index is how many steps we have to take from the start to get the item we wa
 > which can be confusing when plotting data.
 {: .callout}
 
-An index like `[30, 20]` selects a single element of an array,
+An index like `[56, 1]` selects a single element of an array,
 but we can select whole sections as well.
 For example,
-we can select the first ten days (columns) of values
-for the first four patients (rows) like this:
+we can select the first ten years (rows) of values
+for the temperature (second column) like this:
 
 ~~~
-print(data[0:4, 0:10])
+print(data[0:10, 1])
 ~~~
 {: .python}
 
 ~~~
-[[ 0.  0.  1.  3.  1.  2.  4.  7.  8.  3.]
- [ 0.  1.  2.  1.  2.  1.  3.  2.  2.  6.]
- [ 0.  1.  1.  3.  3.  2.  6.  2.  5.  9.]
- [ 0.  0.  2.  0.  4.  2.  2.  1.  6.  7.]]
+[-7.67241907 -7.86271143 -7.91078281 -8.15572929 -7.54731131 -7.68410349
+ -8.41355324 -7.79092932 -8.2393055  -7.77461147]
 ~~~
 {: .output}
 
-The [slice]({{ site.github.url }}/reference/#slice) `0:4` means,
-"Start at index 0 and go up to, but not including, index 4."
+The [slice]({{ site.github.url }}/reference/#slice) `0:10` means,
+"Start at index 0 and go up to, but not including, index 10."
 Again,
 the up-to-but-not-including takes a bit of getting used to,
 but the rule is that the difference between the upper and lower bounds is the number of values in the slice.
@@ -387,16 +394,16 @@ but the rule is that the difference between the upper and lower bounds is the nu
 We don't have to start slices at 0:
 
 ~~~
-print(data[5:10, 0:10])
+print(data[5:10, 1:3])
 ~~~
 {: .python}
 
 ~~~
-[[ 0.  0.  1.  2.  2.  4.  2.  1.  6.  4.]
- [ 0.  0.  2.  2.  4.  2.  2.  5.  5.  8.]
- [ 0.  0.  1.  2.  3.  1.  2.  3.  5.  3.]
- [ 0.  0.  0.  3.  1.  5.  6.  5.  5.  8.]
- [ 0.  1.  1.  2.  1.  3.  5.  3.  5.  8.]]
+[[ -7.68410349  37.51700592]
+ [ -8.41355324  36.76292038]
+ [ -7.79092932  36.40164948]
+ [ -8.2393055   36.98836136]
+ [ -7.77461147  36.27269745]]
 ~~~
 {: .output}
 
@@ -410,7 +417,7 @@ and if we don't include either
 the slice includes everything:
 
 ~~~
-small = data[:3, 36:]
+small = data[:3, :]
 print('small is:')
 print(small)
 ~~~
@@ -418,9 +425,9 @@ print(small)
 
 ~~~
 small is:
-[[ 2.  3.  0.  0.]
- [ 1.  1.  0.  1.]
- [ 2.  2.  1.  1.]]
+[[ 1901.            -7.67241907    37.44835281]
+ [ 1902.            -7.86271143    38.25142288]
+ [ 1903.            -7.91078281    37.5530014 ]]
 ~~~
 {: .output}
 
@@ -441,21 +448,21 @@ whose elements have the value of two times the value of the corresponding elemen
 
 ~~~
 print('original:')
-print(data[:3, 36:])
+print(data[:3, :])
 print('doubledata:')
-print(doubledata[:3, 36:])
+print(doubledata[:3, :])
 ~~~
 {: .python}
 
 ~~~
 original:
-[[ 2.  3.  0.  0.]
- [ 1.  1.  0.  1.]
- [ 2.  2.  1.  1.]]
+[[ 1901.            -7.67241907    37.44835281]
+ [ 1902.            -7.86271143    38.25142288]
+ [ 1903.            -7.91078281    37.5530014 ]]
 doubledata:
-[[ 4.  6.  0.  0.]
- [ 2.  2.  0.  2.]
- [ 4.  4.  2.  2.]]
+[[ 3802.           -15.34483814    74.89670562]
+ [ 3804.           -15.72542286    76.50284576]
+ [ 3806.           -15.82156563    75.1060028 ]]
 ~~~
 {: .output}
 
@@ -475,31 +482,31 @@ and so on for all other elements of the arrays.
 
 ~~~
 print('tripledata:')
-print(tripledata[:3, 36:])
+print(tripledata[:3, :])
 ~~~
 {: .python}
 
 ~~~
 tripledata:
-[[ 6.  9.  0.  0.]
- [ 3.  3.  0.  3.]
- [ 6.  6.  3.  3.]]
+[[ 5703.           -23.01725721   112.34505843]
+ [ 5706.           -23.58813429   114.75426864]
+ [ 5709.           -23.73234844   112.6590042 ]]
 ~~~
 {: .output}
 
 Often, we want to do more than add, subtract, multiply, and divide values of data.
 NumPy knows how to do more complex operations on arrays.
-If we want to find the average inflammation for all patients on all days,
+If we want to find the average temperature across all years,
 for example,
-we can ask NumPy to compute `data`'s mean value:
+we can ask NumPy to compute that column's mean value:
 
 ~~~
-print(numpy.mean(data))
+print(numpy.mean(data[:, 1]))
 ~~~
 {: .python}
 
 ~~~
-6.14875
+-7.42467926652
 ~~~
 {: .output}
 
@@ -537,18 +544,19 @@ We'll also use multiple assignment,
 a convenient Python feature that will enable us to do this all in one line.
 
 ~~~
-maxval, minval, stdval = numpy.max(data), numpy.min(data), numpy.std(data)
+temp = data[:, 1]
+maxval, minval, stdval = numpy.max(temp), numpy.min(temp), numpy.std(temp)
 
-print('maximum inflammation:', maxval)
-print('minimum inflammation:', minval)
+print('maximum temperature:', maxval)
+print('minimum temperature:', minval)
 print('standard deviation:', stdval)
 ~~~
 {: .python}
 
 ~~~
-maximum inflammation: 20.0
-minimum inflammation: 0.0
-standard deviation: 4.61383319712
+maximum temperature: -4.703649521
+minimum temperature: -9.525187492
+standard deviation: 0.77853048975
 ~~~
 {: .output}
 
@@ -563,73 +571,51 @@ standard deviation: 4.61383319712
 > explanation of the method! This is the same as doing `help(numpy.cumprod)`.
 {: .callout}
 
-When analyzing data, though,
-we often want to look at partial statistics,
-such as the maximum value per patient
-or the average value per day.
-One way to do this is to create a new temporary array of the data we want,
-then ask it to do the calculation:
-
-~~~
-patient_0 = data[0, :] # 0 on the first axis, everything on the second
-print('maximum inflammation for patient 0:', patient_0.max())
-~~~
-{: .python}
-
-~~~
-maximum inflammation for patient 0: 18.0
-~~~
-{: .output}
-
-Everything in a line of code following the '#' symbol is a
-[comment]({{ site.github.url }}/reference/#comment) that is ignored by the computer.
-Comments allow programmers to leave explanatory notes for other
-programmers or their future selves.
-
-We don't actually need to store the row in a variable of its own.
-Instead, we can combine the selection and the function call:
-
-~~~
-print('maximum inflammation for patient 2:', numpy.max(data[2, :]))
-~~~
-{: .python}
-
-~~~
-maximum inflammation for patient 2: 19.0
-~~~
-{: .output}
-
-What if we need the maximum inflammation for each patient over all days (as in the
-next diagram on the left), or the average for each day (as in the
-diagram on the right)? As the diagram below shows, we want to perform the
-operation across an axis:
-
-![Operations Across Axes](../fig/python-operations-across-axes.png)
-
-To support this,
-most array functions allow us to specify the axis we want to work on.
-If we ask for the average across axis 0 (rows in our 2D example),
-we get:
-
+We can also compute a column-wise or row-wise mean:
 ~~~
 print(numpy.mean(data, axis=0))
 ~~~
 {: .python}
 
 ~~~
-[  0.           0.45         1.11666667   1.75         2.43333333   3.15
-   3.8          3.88333333   5.23333333   5.51666667   5.95         5.9
-   8.35         7.73333333   8.36666667   9.5          9.58333333
-  10.63333333  11.56666667  12.35        13.25        11.96666667
-  11.03333333  10.16666667  10.           8.66666667   9.15         7.25
-   7.33333333   6.58333333   6.06666667   5.95         5.11666667   3.6
-   3.3          3.56666667   2.48333333   1.5          1.13333333
-   0.56666667]
+[ 1956.5           -7.42467927    36.63399274]
 ~~~
 {: .output}
 
+This also includes the average year, which is not that interesting.
+We can use slicing to remove it, either before or after taking the mean.
+~~~
+# don't show the average year
+print(numpy.mean(data[:,1:], axis=0))
+print(numpy.mean(data, axis=0)[1:])
+~~~
+{: .python}
+
+
+Everything in a line of code following the '#' symbol is a
+[comment]({{ site.github.url }}/reference/#comment) that is ignored by the computer.
+Comments allow programmers to leave explanatory notes for other
+programmers or their future selves.
+
+It's easy to forget whether to use `axis=0` or `axis=1`.
 As a quick check,
 we can ask this array what its shape is:
+
+~~~
+print(numpy.mean(data, axis=1).shape)
+~~~
+{: .python}
+
+~~~
+(112,)
+~~~
+{: .output}
+
+The expression `(112,)` tells us we have an N×1 vector.
+Comparing with the original shape of data, this suggests
+this is the average of year, temperature and precipitation
+on each row, which is not what we want. We can tell `axis=0` 
+is right just by its shape:
 
 ~~~
 print(numpy.mean(data, axis=0).shape)
@@ -637,30 +623,9 @@ print(numpy.mean(data, axis=0).shape)
 {: .python}
 
 ~~~
-(40,)
+(3,)
 ~~~
 {: .output}
-
-The expression `(40,)` tells us we have an N×1 vector,
-so this is the average inflammation per day for all patients.
-If we average across axis 1 (columns in our 2D example), we get:
-
-~~~
-print(numpy.mean(data, axis=1))
-~~~
-{: .python}
-
-~~~
-[ 5.45   5.425  6.1    5.9    5.55   6.225  5.975  6.65   6.625  6.525
-  6.775  5.8    6.225  5.75   5.225  6.3    6.55   5.7    5.85   6.55
-  5.775  5.825  6.175  6.1    5.8    6.425  6.05   6.025  6.175  6.55
-  6.175  6.35   6.725  6.125  7.075  5.725  5.925  6.15   6.075  5.75
-  5.975  5.725  6.3    5.9    6.75   5.925  7.225  6.15   5.95   6.275  5.7
-  6.1    6.825  5.975  6.725  5.7    6.25   6.4    7.05   5.9  ]
-~~~
-{: .output}
-
-which is the average inflammation per patient across all days.
 
 The mathematician Richard Hamming once said,
 "The purpose of computing is insight, not numbers,"
@@ -671,20 +636,23 @@ While there is no "official" plotting library,
 this package is the de facto standard.
 First,
 we will import the `pyplot` module from `matplotlib`
-and use two of its functions to create and display a heat map of our data:
+and use two of its functions to create and display a time series of the temperature:
 
 ~~~
-import matplotlib.pyplot
-image  = matplotlib.pyplot.imshow(data)
-matplotlib.pyplot.show()
+import matplotlib.pyplot as plt
+plt.plot(data[:,0], data[:,1])
+plt.show()
 ~~~
 {: .python}
 
-![Heatmap of the Data](../fig/01-numpy_71_0.png)
+Note that when importing pyplot, we renamed it to plt with the `as` keyword.
+This saves us from typing `matplotlib.pyplot.` every time, and is a very
+common convention.
 
-Blue regions in this heat map are low values, while red shows high values.
-As we can see,
-inflammation rises and falls over a 40-day period.
+![Annual temperatures in Canada](../fig/01-numpy_71_0.png)
+
+As we can see, the average temperature has been slowly increasing over the years.
+
 
 > ## Some IPython Magic
 >
@@ -703,49 +671,15 @@ inflammation rises and falls over a 40-day period.
 > Note that you only have to execute this function once per notebook.
 {: .callout}
 
-Let's take a look at the average inflammation over time:
+Let's take a look at the average precipitation over time:
 
 ~~~
-ave_inflammation = numpy.mean(data, axis=0)
-ave_plot = matplotlib.pyplot.plot(ave_inflammation)
+plt.plot(data[:,0], data[:,2])
 matplotlib.pyplot.show()
 ~~~
 {: .python}
 
-![Average Inflammation Over Time](../fig/01-numpy_73_0.png)
-
-Here,
-we have put the average per day across all patients in the variable `ave_inflammation`,
-then asked `matplotlib.pyplot` to create and display a line graph of those values.
-The result is roughly a linear rise and fall,
-which is suspicious:
-based on other studies,
-we expect a sharper rise and slower fall.
-Let's have a look at two other statistics:
-
-~~~
-max_plot = matplotlib.pyplot.plot(numpy.max(data, axis=0))
-matplotlib.pyplot.show()
-~~~
-{: .python}
-
-![Maximum Value Along The First Axis](../fig/01-numpy_75_1.png)
-
-~~~
-min_plot = matplotlib.pyplot.plot(numpy.min(data, axis=0))
-matplotlib.pyplot.show()
-~~~
-{: .python}
-
-![Minimum Value Along The First Axis](../fig/01-numpy_75_3.png)
-
-The maximum value rises and falls perfectly smoothly,
-while the minimum seems to be a step function.
-Neither result seems particularly likely,
-so either there's a mistake in our calculations
-or something is wrong with our data.
-This insight would have been difficult to reach by
-examining the data without visualization tools.
+![Annual precipitation in Canada](../fig/01-numpy_73_0.png)
 
 You can group similar plots in a single figure using subplots.
 This script below uses a number of new commands. The function `matplotlib.pyplot.figure()`
@@ -755,34 +689,30 @@ its `add_subplot` [method]({{ site.github.url }}/reference/#method). The `add_su
 how many total rows of subplots there are, the second parameter refers to the
 total number of subplot columns, and the final parameter denotes which subplot
 your variable is referencing (left-to-right, top-to-bottom). Each subplot is stored in a
-different variable (`axes1`, `axes2`, `axes3`). Once a subplot is created, the axes can
+different variable (`axes1`, `axes2`). Once a subplot is created, the axes can
 be titled using the `set_xlabel()` command (or `set_ylabel()`).
-Here are our three plots side by side:
+Here are our two plots side by side:
 
 ~~~
 import numpy
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 
-data = numpy.loadtxt(fname='inflammation-01.csv', delimiter=',')
+data = numpy.loadtxt(fname='CAN.csv', delimiter=',', skiprows=1)
 
-fig = matplotlib.pyplot.figure(figsize=(10.0, 3.0))
+fig = plt.figure(figsize=(10.0, 4.0))
 
-axes1 = fig.add_subplot(1, 3, 1)
-axes2 = fig.add_subplot(1, 3, 2)
-axes3 = fig.add_subplot(1, 3, 3)
+axes1 = fig.add_subplot(1, 2, 1)
+axes2 = fig.add_subplot(1, 2, 2)
 
-axes1.set_ylabel('average')
-axes1.plot(numpy.mean(data, axis=0))
+axes1.set_ylabel('Temperature (C)')
+axes1.plot(data[:,0], data[:,1])
 
-axes2.set_ylabel('max')
-axes2.plot(numpy.max(data, axis=0))
-
-axes3.set_ylabel('min')
-axes3.plot(numpy.min(data, axis=0))
+axes2.set_ylabel('Precipitation (mm)')
+axes2.plot(data[:,0], data[:,2])
 
 fig.tight_layout()
 
-matplotlib.pyplot.show()
+plt.show()
 ~~~
 {: .python}
 
@@ -791,7 +721,7 @@ matplotlib.pyplot.show()
 The [call]({{ site.github.url }}/reference/#function-call) to `loadtxt` reads our data,
 and the rest of the program tells the plotting library
 how large we want the figure to be,
-that we're creating three subplots,
+that we're creating two subplots,
 what to draw for each one,
 and that we want a tight layout.
 (Perversely,
@@ -895,8 +825,8 @@ the graphs will actually be squeezed together more closely.)
 >
 > The expression `element[3:3]` produces an [empty string]({{ site.github.url }}/reference/#empty-string),
 > i.e., a string that contains no characters.
-> If `data` holds our array of patient data,
-> what does `data[3:3, 4:4]` produce?
+> If `data` holds our array of data,
+> what does `data[3:3, 0:0]` produce?
 > What about `data[3:3, :]`?
 >
 > > ## Solution
@@ -908,104 +838,34 @@ the graphs will actually be squeezed together more closely.)
 > {: .solution}
 {: .challenge}
 
-> ## Plot Scaling
->
-> Why do all of our plots stop just short of the upper end of our graph?
->
-> > ## Solution
-> > Because matplotlib normally sets x and y axes limits to the min and max of our data
-> > (depending on data range)
-> {: .solution}
->
-> If we want to change this, we can use the `set_ylim(min, max)` method of each 'axes',
-> for example:
->
-> ~~~
-> axes3.set_ylim(0,6)
-> ~~~
-> {: .python}
->
-> Update your plotting code to automatically set a more appropriate scale.
-> (Hint: you can make use of the `max` and `min` methods to help.)
->
-> > ## Solution
-> > ~~~
-> > # One method
-> > axes3.set_ylabel('min')
-> > axes3.plot(numpy.min(data, axis=0))
-> > axes3.set_ylim(0,6)
-> > ~~~
-> > {: .python}
-> {: .solution}
->
-> > ## Solution
-> > ~~~
-> > # A more automated approach
-> > min_data = numpy.min(data, axis=0)
-> > axes3.set_ylabel('min')
-> > axes3.plot(min_data)
-> > axes3.set_ylim(numpy.min(min_data), numpy.max(min_data) * 1.1)
-> > ~~~
-> > {: .python}
-> {: .solution}
-{: .challenge}
-
-> ## Drawing Straight Lines
->
-> Why are the vertical lines in our plot of the minimum inflammation per day
-> not perfectly vertical?
->
-> > ## Solution
-> > Because matplotlib interpolates (draws a straight line) between the points
-> {: .solution}
-{: .challenge}
-
-> ## Make Your Own Plot
->
-> Create a plot showing the standard deviation (`numpy.std`)
-> of the inflammation data for each day across all patients.
->
-> > ## Solution
-> > ~~~
-> > max_plot = matplotlib.pyplot.plot(numpy.std(data, axis=0))
-> > matplotlib.pyplot.show()
-> > ~~~
-> > {: .python}
-> {: .solution}
-{: .challenge}
-
 > ## Moving Plots Around
 >
-> Modify the program to display the three plots on top of one another
+> Modify the program to display the two plots on top of one another
 > instead of side by side.
 >
 > > ## Solution
 > > ~~~
 > > import numpy
-> > import matplotlib.pyplot
+> > import matplotlib.pyplot as plt
 > >
-> > data = numpy.loadtxt(fname='data/inflammation-01.csv', delimiter=',')
+> > data = numpy.loadtxt(fname='CAN.csv', delimiter=',', skiprows=1)
 > >
 > > # change figsize (swap width and height)
-> > fig = matplotlib.pyplot.figure(figsize=(3.0, 10.0))
+> > fig = plt.figure(figsize=(4.0, 10.0))
 > >
 > > # change add_subplot (swap first two parameters)
-> > axes1 = fig.add_subplot(3, 1, 1)
-> > axes2 = fig.add_subplot(3, 1, 2)
-> > axes3 = fig.add_subplot(3, 1, 3)
+> > axes1 = fig.add_subplot(2, 1, 1)
+> > axes2 = fig.add_subplot(2, 1, 2)
 > >
-> > axes1.set_ylabel('average')
-> > axes1.plot(numpy.mean(data, axis=0))
+> > axes1.set_ylabel('Temperature (C)')
+> > axes1.plot(data[:,0], data[:,1])
 > >
-> > axes2.set_ylabel('max')
-> > axes2.plot(numpy.max(data, axis=0))
-> >
-> > axes3.set_ylabel('min')
-> > axes3.plot(numpy.min(data, axis=0))
+> > axes2.set_ylabel('Precipitation (mm)')
+> > axes2.plot(data[:,0], data[:,2])
 > >
 > > fig.tight_layout()
 > >
-> > matplotlib.pyplot.show()
+> > plt.show()
 > > ~~~
 > > {: .python}
 > {: .solution}
