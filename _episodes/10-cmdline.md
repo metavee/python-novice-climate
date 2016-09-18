@@ -23,7 +23,7 @@ In order to do that,
 we need to make our programs work like other Unix command-line tools.
 For example,
 we may want a program that reads a dataset
-and prints the average inflammation per patient.
+and prints the average climate data such as precipitation and temperature per country.
 
 > ## Switching to Shell Commands
 >
@@ -32,32 +32,41 @@ and prints the average inflammation per patient.
 > command that tells you to run that command in the shell rather than the Python interpreter.
 {: .callout}
 
-This program does exactly what we want - it prints the average inflammation per patient
-for a given file.
+This program does exactly what we want - it prints the average climate data
+per country for a given file.
 
 ~~~
-$ python code/readings_04.py --mean data/inflammation-01.csv
-5.45
-5.425
-6.1
-...
-6.4
-7.05
-5.9
+$ python readings.py --min ../climate_data/CAN.csv 
+1901.0
+-9.525187492
+34.26067352
 ~~~
 {: .bash}
 
-We might also want to look at the minimum of the first four lines
+We might also want to look at the minimum statistics in the last 20 years:
 
 ~~~
-$ head -4 data/inflammation-01.csv | python code/readings_04.py --min
+$ tail -20 ../climate_data/CAN.csv | python readings.py --min
+1994.0
+-7.529717445
+35.95681
 ~~~
 {: .bash}
 
-or the maximum inflammations in several files one after another:
+or the maximum climate statistics in several files one after another:
 
 ~~~
-$ python code/readings_04.py --max data/inflammation-*.csv
+$ python readings.py --max ../climate_data/*.csv
+2012.0
+-4.703649521
+39.74348831
+2012.0
+22.03152657
+73.91746521
+2012.0
+8.045992851
+61.51809692
+
 ~~~
 {: .bash}
 
@@ -142,7 +151,7 @@ sys.argv is ['argv_list.py', 'first', 'second', 'third']
 then Python adds each of those arguments to that magic list.
 
 With this in hand,
-let's build a version of `readings.py` that always prints the per-patient mean of a single data file.
+let's build a version of `readings.py` that always prints the per-country mean of a single data file.
 The first step is to write a function that outlines our implementation,
 and a placeholder for the function that does the actual work.
 By convention this function is usually called `main`,
@@ -160,8 +169,8 @@ import numpy
 def main():
     script = sys.argv[0]
     filename = sys.argv[1]
-    data = numpy.loadtxt(filename, delimiter=',')
-    for m in numpy.mean(data, axis=1):
+    data = numpy.loadtxt(filename, delimiter=',', skiprows=1)
+    for m in numpy.mean(data, axis=0):
         print(m)
 ~~~
 {: .python}
@@ -172,7 +181,7 @@ and the name of the file to process from `sys.argv[1]`.
 Here's a simple test:
 
 ~~~
-$ python readings_01.py inflammation-01.csv
+$ python readings_01.py CAN.csv
 ~~~
 {: .bash}
 
@@ -192,83 +201,26 @@ import numpy
 def main():
     script = sys.argv[0]
     filename = sys.argv[1]
-    data = numpy.loadtxt(filename, delimiter=',')
-    for m in numpy.mean(data, axis=1):
+    data = numpy.loadtxt(filename, delimiter=',', skiprows=1)
+    for m in numpy.mean(data, axis=0):
         print(m)
 
-if __name__ == '__main__':
-   main()
+if __name__=="__main__":
+    main()
 ~~~
 {: .python}
 
 and run that:
 
 ~~~
-$ python readings_02.py inflammation-01.csv
+$ python readings_02.py CAN.csv
 ~~~
 {: .bash}
 
 ~~~
-5.45
-5.425
-6.1
-5.9
-5.55
-6.225
-5.975
-6.65
-6.625
-6.525
-6.775
-5.8
-6.225
-5.75
-5.225
-6.3
-6.55
-5.7
-5.85
-6.55
-5.775
-5.825
-6.175
-6.1
-5.8
-6.425
-6.05
-6.025
-6.175
-6.55
-6.175
-6.35
-6.725
-6.125
-7.075
-5.725
-5.925
-6.15
-6.075
-5.75
-5.975
-5.725
-6.3
-5.9
-6.75
-5.925
-7.225
-6.15
-5.95
-6.275
-5.7
-6.1
-6.825
-5.975
-6.725
-5.7
-6.25
-6.4
-7.05
-5.9
+1956.5
+-7.42467926652
+36.63399274
 ~~~
 {: .output}
 
@@ -316,49 +268,48 @@ $ python readings_02.py inflammation-01.csv
 ## Handling Multiple Files
 
 The next step is to teach our program how to handle multiple files.
-Since 60 lines of output per file is a lot to page through,
-we'll start by using three smaller files,
-each of which has three days of data for two patients:
+We’ll start by using files for three countries:
 
 ~~~
-$ ls small-*.csv
+$ ls *.csv
 ~~~
 {: .bash}
 
 ~~~
-small-01.csv small-02.csv small-03.csv
+CAN.csv MEX.csv USA.csv
 ~~~
 {: .output}
 
 ~~~
-$ cat small-01.csv
+$ head CAN.csv
 ~~~
 {: .bash}
 
 ~~~
-0,0,1
-0,1,2
+year,temp,precip
+1901,-7.672419071,37.44835281
+1902,-7.86271143,38.25142288
+1903,-7.910782814,37.5530014
+1904,-8.155729294,37.35193253
+1905,-7.547311306,37.51586914
+1906,-7.684103489,37.51700592
+1907,-8.413553238,36.76292038
+1908,-7.790929317,36.40164948
+1909,-8.239305496,36.98836136
 ~~~
 {: .output}
 
 ~~~
-$ python readings_02.py small-01.csv
+$ python readings_02.py CAN.csv
 ~~~
 {: .bash}
 
 ~~~
-0.333333333333
-1.0
+1956.5
+-7.42467926652
+36.63399274
 ~~~
 {: .output}
-
-Using small data files as input also allows us to check our results more easily:
-here,
-for example,
-we can see that our program is calculating the mean correctly for each line,
-whereas we were really taking it on faith before.
-This is yet another rule of programming:
-*test the simple things first*.
 
 We want our program to process each file separately,
 so we need a loop that executes once for each filename.
@@ -391,8 +342,8 @@ import numpy
 def main():
     script = sys.argv[0]
     for filename in sys.argv[1:]:
-        data = numpy.loadtxt(filename, delimiter=',')
-        for m in numpy.mean(data, axis=1):
+        data = numpy.loadtxt(filename, delimiter=',', skiprows=1)
+        for m in numpy.mean(data, axis=0):
             print(m)
 
 if __name__ == '__main__':
@@ -403,15 +354,20 @@ if __name__ == '__main__':
 and here it is in action:
 
 ~~~
-$ python readings_03.py small-01.csv small-02.csv
+$ python readings_03.py CAN.csv MEX.csv USA.csv
 ~~~
 {: .bash}
 
 ~~~
-0.333333333333
-1.0
-13.6666666667
-11.0
+1956.5
+-7.42467926652
+36.63399274
+1956.5
+21.0038201814
+58.1393322261
+1956.5
+6.88580492568
+55.2995969229
 ~~~
 {: .output}
 
@@ -450,14 +406,14 @@ def main():
     filenames = sys.argv[2:]
 
     for f in filenames:
-        data = numpy.loadtxt(f, delimiter=',')
+        data = numpy.loadtxt(f, delimiter=',', skiprows=1)
 
         if action == '--min':
-            values = numpy.min(data, axis=1)
+            values = numpy.min(data, axis=0)
         elif action == '--mean':
-            values = numpy.mean(data, axis=1)
+            values = numpy.mean(data, axis=0)
         elif action == '--max':
-            values = numpy.max(data, axis=1)
+            values = numpy.max(data, axis=0)
 
         for m in values:
             print(m)
@@ -470,13 +426,14 @@ if __name__ == '__main__':
 This works:
 
 ~~~
-$ python readings_04.py --max small-01.csv
+$ python readings_04.py --max CAN.csv
 ~~~
 {: .bash}
 
 ~~~
-1.0
-2.0
+2012.0
+-4.703649521
+39.74348831
 ~~~
 {: .output}
 
@@ -516,15 +473,15 @@ def main():
     for f in filenames:
         process(f, action)
 
-def process(filename, action):
-    data = numpy.loadtxt(filename, delimiter=',')
+def process(f, action):
+    data = numpy.loadtxt(f, delimiter=',', skiprows=1)
 
     if action == '--min':
-        values = numpy.min(data, axis=1)
+        values = numpy.min(data, axis=0)
     elif action == '--mean':
-        values = numpy.mean(data, axis=1)
+        values = numpy.mean(data, axis=0)
     elif action == '--max':
-        values = numpy.max(data, axis=1)
+        values = numpy.max(data, axis=0)
 
     for m in values:
         print(m)
@@ -569,19 +526,19 @@ but we can do almost anything with it that we could do to a regular file.
 Let's try running it as if it were a regular command-line program:
 
 ~~~
-$ python count_stdin.py < small-01.csv
+$ python count_stdin.py < CAN.csv
 ~~~
 {: .bash}
 
 ~~~
-2 lines in standard input
+113 lines in standard input
 ~~~
 {: .output}
 
 A common mistake is to try to run something that reads from standard input like this:
 
 ~~~
-$ python count_stdin.py small-01.csv
+$ python count_stdin.py CAN.csv
 ~~~
 {: .bash}
 
@@ -620,15 +577,15 @@ def main():
         for f in filenames:
             process(f, action)
 
-def process(filename, action):
-    data = numpy.loadtxt(filename, delimiter=',')
+def process(f, action):
+    data = numpy.loadtxt(f, delimiter=',', skiprows=1)
 
     if action == '--min':
-        values = numpy.min(data, axis=1)
+        values = numpy.min(data, axis=0)
     elif action == '--mean':
-        values = numpy.mean(data, axis=1)
+        values = numpy.mean(data, axis=0)
     elif action == '--max':
-        values = numpy.max(data, axis=1)
+        values = numpy.max(data, axis=0)
 
     for m in values:
         print(m)
@@ -641,13 +598,14 @@ if __name__ == '__main__':
 Let's try it out:
 
 ~~~
-$ python readings_06.py --mean < small-01.csv
+$ python readings_06.py --mean < MEX.csv
 ~~~
 {: .bash}
 
 ~~~
-0.333333333333
-1.0
+1956.5
+21.0038201814
+58.1393322261
 ~~~
 {: .output}
 
@@ -895,7 +853,7 @@ the program now does everything we set out to do.
 
 > ## A File-Checker
 >
-> Write a program called `check.py` that takes the names of one or more inflammation data files as arguments
+> Write a program called `check.py` that takes the names of one or more data files as arguments
 > and checks that all the files have the same number of rows and columns.
 > What is the best way to test your program?
 >
