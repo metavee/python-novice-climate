@@ -250,32 +250,116 @@ def analyze(filename):
 ~~~
 {: .python}
 
-and another function called `detect_problems` that checks for those systematics
-we noticed:
+It would also be nice to make some basic numerical calculations on
+the data. One trend that stood out to me was that the average
+temperature rose a lot over time. But how about the standard deviation?
+Is the temperature fluctuating greater amounts over time?
+
+So, I'm not sure if this is the most statistically solid way to tell,
+but we could split the data into chunks of a few years each, and compute
+the sample standard deviation of each chunk.
+
+Since we have a span of 112 years, we can use 4-year chunks, which gives us
+an even 28 chunks to work with.
+
+This sounds like maybe it will take a bit of thinking to implement this
+calculation, but there was something we saw this morning which could help.
+
+We saw that we could get a row-wise or column-wise average by using the `axis=`
+parameter. If we re-arrange our temperatures so that we have rows of 4 years each,
+then we could do something similar with the NumPy function for getting the standard
+deviation. As it turns out, NumPy does have such a function:
 
 ~~~
-def detect_problems(filename):
-
-    data = numpy.loadtxt(filename, delimiter=',')
-
-    if numpy.max(data, axis=0)[0] == 0 and numpy.max(data, axis=0)[20] == 20:
-        print('Suspicious looking maxima!')
-    elif numpy.sum(numpy.min(data, axis=0)) == 0:
-        print('Minima add up to zero!')
-    else:
-        print('Seems OK!')
+temp = numpy.loadtxt('CAN.csv', delimiter=',', skiprows=1)[:,1]
+temp_chunks = temp.reshape([temp.size/4, 4])
+print(temp)
+print(temp_chunks)
 ~~~
 {: .python}
 
+So we pass it the shape we want, with the caveat that the new shape has to have the
+same overall number of elements as the old one.
+
+Now, we can compute the standard deviation:
+
+~~~
+print(numpy.std(temp_chunks, axis=1))
+~~~
+{: .python}
+
+Let's quickly repackage this into a function that plots it. It will look
+similar to our analyze function, but we don't need subplots.
+
+~~~
+def fluctuation(filename):
+
+    data = numpy.loadtxt(filename, delimiter=',', skiprows=1)
+
+    fig = plt.figure(figsize=(5.0, 4.0))
+
+    temp = data[:,1]
+    temp_chunks = temp.reshape([temp.size/4, 4])
+
+    chunk_stddev = numpy.std(temp_chunks, axis=1)
+
+    plt.plot(temp)
+
+    fig.tight_layout()
+    plt.show()
+~~~
+{: .python}
+
+We can quickly test it out:
+
+~~~
+fluctuation('CAN.csv')
+~~~
+{: .python}
+
+Well, it seems to show the standard deviation substantially increasing,
+but this plot is pretty jaggy. Still, it captures the basic trend.
+
+> ## Show the year in the fluctuation plot
+>
+> Note that we didn't supply any data for the x-axis, so the plot just counts
+> upward from 0. It's not so great as a plot, so how might we put the year there?
+> > ## Solution
+> > ~~~
+> > def fluctuation(filename):
+> >     data = numpy.loadtxt(filename, delimiter=',', skiprows=1)
+> > 
+> >     fig = plt.figure(figsize=(5.0, 4.0))
+> > 
+> >     year = data[:,0]
+> >     year_chunks = year.reshape([year.size/4, 4])
+> >     
+> >     year_avg = numpy.mean(year_chunks, axis=1)
+> >     
+> >     temp = data[:,1]
+> >     temp_chunks = temp.reshape([temp.size/4, 4])
+> > 
+> >     chunk_stddev = numpy.std(temp_chunks, axis=1)
+> > 
+> >     plt.plot(year_avg, chunk_stddev)
+> > 
+> >     fig.tight_layout()
+> >     plt.show()
+> > ~~~
+> > {: .python}
+> {: .solution}
+{: .challenge}
+
+Okay, so now we have some plots we want to make for all of our data.
 Notice that rather than jumbling this code together in one giant `for` loop,
 we can now read and reuse both ideas separately.
 We can reproduce the previous analysis with a much simpler `for` loop:
 
 ~~~
-for f in filenames[:3]:
+for f in filenames:
     print(f)
     analyze(f)
-    detect_problems(f)
+    fluctuation(f)
 ~~~
 {: .python}
 
@@ -283,6 +367,13 @@ By giving our functions human-readable names,
 we can more easily read and understand what is happening in the `for` loop.
 Even better, if at some later date we want to use either of those pieces of code again,
 we can do so in a single line.
+
+One thing worth quickly mentioning is that you might want a convenient way to save these
+plots, for instance to embed in a report or a paper. For that, you can use the savefig function.
+There are a few file extensions you can use, which may be better for your use, e.g., PNG, PDF, ...
+You should put this right before where plt.show() goes. And in the future, if you want to make
+the plots without looking at them right away, you can just delete plt.show() and look at the 
+files later.
 
 ## Testing and Documenting
 
@@ -1017,6 +1108,7 @@ readable code!
 > Rewrite the code which determines which country is warmer as a function.
 > You could accept two filenames for different countries as entrance parameters.
 > > ## Solution
+> > ~~~
 > > def warmer(file1, file2):
 > >     temp1 = numpy.loadtxt(file1, delimiter=',', skiprows=1)[:,1]
 > >     temp2 = numpy.loadtxt(file2, delimiter=',', skiprows=1)[:,1]
@@ -1044,5 +1136,35 @@ readable code!
 > >         print(file2[:3], 'is typically warmer than', file1[:3])
 > >     else:
 > >         print('Neither', file1[:3], 'nor', file2[:3], 'are clearly warmer than the other.')
+> > ~~~
+> > {: .python}
+> {: .solution}
+{: .challenge}
+
+> ## Sort the countries by warmth
+> This is a relatively advanced technique, but we can use this warmer function to sort our data.
+> Solution enclosed.
+> > ## Solution
+> > ~~~
+> > def warmer(file1, file2):
+> >     temp1 = numpy.loadtxt(file1, delimiter=',', skiprows=1)[:,1]
+> >     temp2 = numpy.loadtxt(file2, delimiter=',', skiprows=1)[:,1]
+> >     
+> >     # tally of which country is warmer on a given year
+> >     count1 = 0
+> >     count2 = 0
+> >     
+> >     for t1, t2 in zip(temp1, temp2):
+> >         if t1 > t2:
+> >             count1 = count1 + 1
+> >         elif t2 > t1:
+> >             count2 = count2 + 1
+> >     
+> >     return count1 - count2
+> > 
+> > import functools
+> > print(sorted(filenames, key=functools.cmp_to_key(warmer)))
+> > ~~~
+> > {: .python}
 > {: .solution}
 {: .challenge}
