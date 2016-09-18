@@ -52,9 +52,6 @@ def fahr_to_kelvin(temp):
 
 ![The Blueprint for a Python Function](../fig/python-function.svg)
 
-<!--- see https://gist.github.com/wd15/2b4ffbe5ce0d0ddb8a5b to
-regenerate the above figure --->
-
 The function definition opens with the keyword `def` followed by the
 name of the function and a parenthesized list of parameter names. The
 [body]({{ site.github.url }}/reference/#function-body) of the function --- the
@@ -1132,9 +1129,9 @@ readable code!
 > >     print(numpy.mean(temp2))
 > >     
 > >     
-> >     if t1 > t2:
+> >     if count1 > count2:
 > >         print(file1[:3], 'is typically warmer than', file2[:3])
-> >     elif t2 > t1:
+> >     elif count2 > count1:
 > >         print(file2[:3], 'is typically warmer than', file1[:3])
 > >     else:
 > >         print('Neither', file1[:3], 'nor', file2[:3], 'are clearly warmer than the other.')
