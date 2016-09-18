@@ -6,14 +6,14 @@ permalink: /setup/
 
 You need to download some files to follow this lesson:
 
-1. Make a new folder in your Desktop called `python-novice-inflammation`.
-2. Download [python-novice-inflammation-data.zip][zipfile] and move the file to this folder.
-3. If it's not unzipped yet, double-click on it to unzip it. You should end up with a new folder called `data`.
+1. Make a new folder in your Desktop called `python-novice-climate`.
+2. Download [climate_data.zip][zipfile] and move the file to this folder.
+3. If it's not unzipped yet, double-click on it to unzip it. You should end up with a few CSV files with 3-letter country names.
 4. You can access this folder from the Unix shell with:
 
 ~~~
 $ cd
-$ cd Desktop/python-novice-inflammation/data
+$ cd Desktop/python-novice-climate/
 ~~~
 {: .source}
 
@@ -36,4 +36,4 @@ $ python
 ~~~
 {: .source}
 
-[zipfile]: {{ site.github.url }}/data/python-novice-inflammation-data.zip
+[zipfile]: https://dl.dropboxusercontent.com/u/1038239/climate_data.zip
