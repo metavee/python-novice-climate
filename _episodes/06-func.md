@@ -324,6 +324,7 @@ but this plot is pretty jaggy. Still, it captures the basic trend.
 >
 > Note that we didn't supply any data for the x-axis, so the plot just counts
 > upward from 0. It's not so great as a plot, so how might we put the year there?
+> 
 > > ## Solution
 > > ~~~
 > > def fluctuation(filename):
@@ -1107,6 +1108,7 @@ readable code!
 >
 > Rewrite the code which determines which country is warmer as a function.
 > You could accept two filenames for different countries as entrance parameters.
+> 
 > > ## Solution
 > > ~~~
 > > def warmer(file1, file2):
@@ -1144,6 +1146,7 @@ readable code!
 > ## Sort the countries by warmth
 > This is a relatively advanced technique, but we can use this warmer function to sort our data.
 > Solution enclosed.
+> 
 > > ## Solution
 > > ~~~
 > > def warmer(file1, file2):
