@@ -4,6 +4,6 @@ import numpy
 def main():
     script = sys.argv[0]
     filename = sys.argv[1]
-    data = numpy.loadtxt(filename, delimiter=',')
-    for m in data.mean(axis=1):
+    data = numpy.loadtxt(filename, delimiter=',', skiprows=1)
+    for m in numpy.mean(data, axis=0):
         print(m)

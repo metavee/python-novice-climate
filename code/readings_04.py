@@ -7,17 +7,17 @@ def main():
     filenames = sys.argv[2:]
 
     for f in filenames:
-        data = numpy.loadtxt(f, delimiter=',')
+        data = numpy.loadtxt(f, delimiter=',', skiprows=1)
 
         if action == '--min':
-            values = data.min(axis=1)
+            values = numpy.min(data, axis=0)
         elif action == '--mean':
-            values = data.mean(axis=1)
+            values = numpy.mean(data, axis=0)
         elif action == '--max':
-            values = data.max(axis=1)
+            values = numpy.max(data, axis=0)
 
         for m in values:
             print(m)
 
 if __name__ == '__main__':
-    main()
+   main()
