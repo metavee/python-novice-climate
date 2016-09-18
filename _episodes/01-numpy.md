@@ -394,7 +394,7 @@ but the rule is that the difference between the upper and lower bounds is the nu
 We don't have to start slices at 0:
 
 ~~~
-print(data[5:10, 1:3])
+print(data[5:10], data[1:3])
 ~~~
 {: .python}
 
@@ -572,6 +572,7 @@ standard deviation: 0.77853048975
 {: .callout}
 
 We can also compute a column-wise or row-wise mean:
+
 ~~~
 print(numpy.mean(data, axis=0))
 ~~~
@@ -584,6 +585,7 @@ print(numpy.mean(data, axis=0))
 
 This also includes the average year, which is not that interesting.
 We can use slicing to remove it, either before or after taking the mean.
+
 ~~~
 # don't show the average year
 print(numpy.mean(data[:,1:], axis=0))
