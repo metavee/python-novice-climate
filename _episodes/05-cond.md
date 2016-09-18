@@ -151,9 +151,9 @@ for t1, t2 in zip(temp_CAN, temp_USA):
 print(count1)
 print(count2)
 
-if t1 > t2:
+if count1 > count2:
     print('CAN is typically warmer than USA.')
-elif t2 > t1:
+elif count2 > count1:
     print('USA is typically warmer than CAN.')
 else:
     print('Neither USA nor CAN are clearly warmer than the other.')
